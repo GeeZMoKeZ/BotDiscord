@@ -61,7 +61,7 @@ bot.on("ready", async () => {
 bot.on("guildMemberAdd", member => {
     
     if(bdd["message-bienvenue"]){
-        bot.channels.cache.get('701770132812464169').send(bdd["message-bienvenue"]);
+        return bot.channels.cache.get('701770132812464169').send(bdd["message-bienvenue"]);
     }
     else{
         bot.channels.cache.get('701770132812464169').send("Bienvenue sur le serveur");
@@ -73,59 +73,25 @@ bot.on("guildMemberAdd", member => {
 bot.on("message", async message => {
 
     if (message.author.bot) return;
-
-    if(bdd[message.guild.id]["prefix"]){
-        prefix = bdd[message.guild.id]["prefix"]
-    }else{
-        prefix = "!"
-    }
     
-
-    if (message.content.startsWith(prefix + "config")) {
-        
-        let arg = message.content.trim().split(/ +/g)
-        console.log(arg)
-        if(!arg[1]){
-            return message.channel.send(`Vous devez indiquer quel section souhaitez vous configurer`)
-        }
-        else if (arg[1] == "prefix"){
-            if(!arg[2]){
-                return message.channel.send(`Vous devez indiquer un prefix`)
-            }
-            else{
-                bdd[message.guild.id]["prefix"] = arg[2]
-                Savebdd();
-                return message.channel.send(`Le prefix ${arg[2]} à bien été sauvegardé !`);
-            }
-        }
-
-    }
+    let command = message.content.trim().split(" ")[0]
+    let args = message.content.trim().split(" ").slice(1);
     
-    if (message.content.startsWith("!clear")) {
-        // message.delete();
-        if (message.member.hasPermission('MANAGE_MESSAGES')) {
-
-            let args = message.content.trim().split(/ +/g);
-
-            if (args[1]) {
-                if (!isNaN(args[1]) && args[1] >= 1 && args[1] <= 99) {
-
-                    message.channel.bulkDelete(args[1])
-                    message.channel.send(`Vous avez supprimé ${args[1]} message(s)`)
-                    message.channel.bulkDelete(1)
-
-                }
-                else {
-                    message.channel.send(`Vous devez indiquer une valeur entre 1 et 99 !`)
-                }
-            }
-            else {
-                message.channel.send(`Vous devez indiquer un nombre de messages a supprimer !`)
-            }
-        }
-        else {
-            message.channel.send(`Vous devez avoir la permission de gérer les messages pour éxécuter cette commande !`)
-        }
+    prefix = bdd[message.guild.id]["prefix"] || prefix = "!"
+    
+    if (commande === "prefix") {
+        if(!arg[0]) return message.channel.send(`Vous devez indiquer un prefix`);
+        bdd[message.guild.id]["prefix"] = arg[0];
+        Savebdd();
+        return message.channel.send(`Le prefix ${arg[0]} à bien été sauvegardé !`);
+    }
+    if (commande === "clear") {
+        if (!message.member.hasPermission('MANAGE_MESSAGES')) return message.channel.send("Vous n'avez pas les permissions");
+        if(!args[0]) return message.channel.send("Vous devez mettre un nombre de messages à supprimer");
+        if(isNan(args[0])) return message.channel.send("Le nombre de message est invalide");
+        if(parseInt(args[0]) <= 0 || parseInt(args[0]) >= 99) return message.channel.send("Le nombre de messages à supprimer doit être compris entre 1 et 99.")
+        message.channel.bulkDelete(parseInt(args[0])+1)
+        message.channel.send(`Vous avez supprimé ${args[1]} message(s)`).then(msg => { setTimeout(() => { msg.delete() }, 500);
     }
 
     if (message.content.startsWith("!mb")) {
