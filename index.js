@@ -31,11 +31,10 @@ bot.on("ready", async () => {
             maxResults: 1000,
             key: token.youtube,
             type:'video',
-            // channelId: 'UC4KnmRSYO4240Hl201BMgIg' //Chaine de tests
-            channelId: 'UCWqPk07TBQAKy695NJMnlZg'
+            channelId: 'ID_CHANNEL_YOUTUBE'
         };
 
-    let channel_new_vid = bot.channels.cache.get("733425809095917749");
+    let channel_new_vid = bot.channels.cache.get("ID_CHANNEL_NOUVELLE_VIDEO_YOUTUBE");
    
 
 
@@ -61,12 +60,12 @@ bot.on("ready", async () => {
 bot.on("guildMemberAdd", member => {
     
     if(bdd["message-bienvenue"]){
-        bot.channels.cache.get('701770132812464169').send(bdd["message-bienvenue"]);
+        bot.channels.cache.get('ID_CHANNEL_DE_BIENVENUE').send(bdd["message-bienvenue"]);
     }
     else{
-        bot.channels.cache.get('701770132812464169').send("Bienvenue sur le serveur");
+        bot.channels.cache.get('ID_CHANNEL_DE_BIENVENUE').send("Bienvenue sur le serveur");
     }
-    member.roles.add('701156465515167755');
+    member.roles.add('ID_ROLE_DE_BIENVENUE');
 
 })
 
@@ -77,7 +76,7 @@ bot.on("message", async message => {
     if(bdd[message.guild.id]["prefix"]){
         prefix = bdd[message.guild.id]["prefix"]
     }else{
-        prefix = "!"
+        prefix = "LE_PREFIXE"
     }
     
 
@@ -172,7 +171,7 @@ bot.on("message", async message => {
         let totalmembers = message.guild.members.cache.size;
         let totalservers = bot.guilds.cache.size;
         let totalbots = message.guild.members.cache.filter(member => member.user.bot).size;
-        let totalrole = message.guild.roles.cache.get('701156465515167755').members.map(member => member.user.tag).length;
+        let totalrole = message.guild.roles.cache.get('ID_ROLE_DES_NOUVEAUX_MEMBRES').members.map(member => member.user.tag).length;
 
         const monembed = new Discord.MessageEmbed()
             .setColor('#0099ff')
@@ -321,7 +320,7 @@ bot.on("messageReactionAdd", (reaction, member) => {
         reaction.message.channel.send('Tu as réagi : ✅');
         var channel_ticket = reaction.message.guild.channels.create('ticket', {
             type: 'text',
-            parent: "699308964575314043",
+            parent: "ID_DE_LA_CATEGORY",
             permissionOverwrites: [{
                 id: reaction.message.guild.id,
                 deny: ['SEND_MESSAGES'],
