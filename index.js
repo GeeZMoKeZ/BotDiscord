@@ -1,4 +1,4 @@
-﻿const Discord = require("discord.js");
+const Discord = require("discord.js");
 const token = require("./token.json");
 const fs = require("fs");
 const bdd = require("./bdd.json");
@@ -31,11 +31,10 @@ bot.on("ready", async () => {
             maxResults: 1000,
             key: token.youtube,
             type:'video',
-            // channelId: 'UC4KnmRSYO4240Hl201BMgIg' //Chaine de tests
-            channelId: 'UCWqPk07TBQAKy695NJMnlZg'
+            channelId: 'ID_CHANNEL_YOUTUBE'
         };
 
-    let channel_new_vid = bot.channels.cache.get("733425809095917749");
+    let channel_new_vid = bot.channels.cache.get("ID_CHANNEL_NOUVELLE_VIDEO_YOUTUBE");
    
 
 
@@ -61,83 +60,45 @@ bot.on("ready", async () => {
 bot.on("guildMemberAdd", member => {
     
     if(bdd["message-bienvenue"]){
-        bot.channels.cache.get('701770132812464169').send(bdd["message-bienvenue"]);
+        bot.channels.cache.get('ID_CHANNEL_DE_BIENVENUE').send(bdd["message-bienvenue"]);
     }
     else{
-        bot.channels.cache.get('701770132812464169').send("Bienvenue sur le serveur");
+        bot.channels.cache.get('ID_CHANNEL_DE_BIENVENUE').send("Bienvenue sur le serveur");
     }
-    member.roles.add('701156465515167755');
+    member.roles.add('ID_ROLE_DE_BIENVENUE');
 
 })
 
 bot.on("message", async message => {
 
     if (message.author.bot) return;
-
-    if(bdd[message.guild.id]["prefix"]){
-        prefix = bdd[message.guild.id]["prefix"]
-    }else{
-        prefix = "!"
-    }
     
-
-    if (message.content.startsWith(prefix + "config")) {
-        
-        let arg = message.content.trim().split(/ +/g)
-        console.log(arg)
-        if(!arg[1]){
-            return message.channel.send(`Vous devez indiquer quel section souhaitez vous configurer`)
-        }
-        else if (arg[1] == "prefix"){
-            if(!arg[2]){
-                return message.channel.send(`Vous devez indiquer un prefix`)
-            }
-            else{
-                bdd[message.guild.id]["prefix"] = arg[2]
-                Savebdd();
-                return message.channel.send(`Le prefix ${arg[2]} à bien été sauvegardé !`);
-            }
-        }
-
-    }
+    let command = message.content.trim().split(" ")[0]
+    let args = message.content.trim().split(" ").slice(1);
     
-    if (message.content.startsWith("!clear")) {
-        // message.delete();
-        if (message.member.hasPermission('MANAGE_MESSAGES')) {
-
-            let args = message.content.trim().split(/ +/g);
-
-            if (args[1]) {
-                if (!isNaN(args[1]) && args[1] >= 1 && args[1] <= 99) {
-
-                    message.channel.bulkDelete(args[1])
-                    message.channel.send(`Vous avez supprimé ${args[1]} message(s)`)
-                    message.channel.bulkDelete(1)
-
-                }
-                else {
-                    message.channel.send(`Vous devez indiquer une valeur entre 1 et 99 !`)
-                }
-            }
-            else {
-                message.channel.send(`Vous devez indiquer un nombre de messages a supprimer !`)
-            }
-        }
-        else {
-            message.channel.send(`Vous devez avoir la permission de gérer les messages pour éxécuter cette commande !`)
-        }
+    prefix = bdd[message.guild.id]["prefix"] || "!"
+    
+    if (commande === "prefix") {
+        if(!arg[0]) return message.channel.send(`Vous devez indiquer un prefix`);
+        bdd[message.guild.id]["prefix"] = arg[0];
+        Savebdd();
+        return message.channel.send(`Le prefix ${arg[0]} à bien été sauvegardé !`);
     }
-
-    if (message.content.startsWith("!mb")) {
+    if (commande === "clear") {
+        if (!message.member.hasPermission('MANAGE_MESSAGES')) return message.channel.send("Vous n'avez pas les permissions");
+        if(!args[0]) return message.channel.send("Vous devez mettre un nombre de messages à supprimer");
+        if(isNan(args[0])) return message.channel.send("Le nombre de message est invalide");
+        if(parseInt(args[0]) <= 0 || parseInt(args[0]) >= 99) return message.channel.send("Le nombre de messages à supprimer doit être compris entre 1 et 99.")
+        message.channel.bulkDelete(parseInt(args[0])+1)
+        message.channel.send(`Vous avez supprimé ${args[1]} message(s)`).then(msg => { setTimeout(() => { msg.delete() }, 500); });
+    }
+    if (commande === "mb") {
         message.delete()
-        if (message.member.hasPermission('MANAGE_MESSAGES')) {
-            if (message.content.length > 5) {
-                message_bienvenue = message.content.slice(4)
+        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Vous devez avoir les permissions pour pouvoir faire cette commande.")
+        if(!args[0]) return message.channel.send("Vous devez inclure un message.")
+                message_bienvenue = args.join(" ");
                 bdd["message-bienvenue"] = message_bienvenue
                 Savebdd()
-
-            }
-        }
     }
     if (message.content.startsWith("!warn")) {
         if (message.member.hasPermission('BAN_MEMBERS')) {
@@ -172,7 +133,7 @@ bot.on("message", async message => {
         let totalmembers = message.guild.members.cache.size;
         let totalservers = bot.guilds.cache.size;
         let totalbots = message.guild.members.cache.filter(member => member.user.bot).size;
-        let totalrole = message.guild.roles.cache.get('701156465515167755').members.map(member => member.user.tag).length;
+        let totalrole = message.guild.roles.cache.get('ID_ROLE_DES_NOUVEAUX_MEMBRES').members.map(member => member.user.tag).length;
 
         const monembed = new Discord.MessageEmbed()
             .setColor('#0099ff')
@@ -321,7 +282,7 @@ bot.on("messageReactionAdd", (reaction, member) => {
         reaction.message.channel.send('Tu as réagi : ✅');
         var channel_ticket = reaction.message.guild.channels.create('ticket', {
             type: 'text',
-            parent: "699308964575314043",
+            parent: "ID_DE_LA_CATEGORY",
             permissionOverwrites: [{
                 id: reaction.message.guild.id,
                 deny: ['SEND_MESSAGES'],
@@ -475,4 +436,3 @@ async function execute(message, serverQueue) {
   }
 
 bot.login(token.token);
-
